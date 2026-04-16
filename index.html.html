@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL // Autonomous AI Defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e0d;
+    --bg-elev: #0f1514;
+    --bg-light: #f5f2e8;
+    --ink: #e8e4d8;
+    --ink-dim: #9a9588;
+    --ink-faint: #4a4842;
+    --ink-dark: #1a1f1e;
+    --accent: #d4ff3a;
+    --accent-dim: #8ba025;
+    --danger: #ff4a3d;
+    --grid: rgba(232, 228, 216, 0.06);
+    --grid-dark: rgba(26, 31, 30, 0.08);
+    --line: rgba(232, 228, 216, 0.15);
+    --line-dark: rgba(26, 31, 30, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* TICKER */
+  .ticker {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 0;
+    overflow: hidden;
+    z-index: 101;
+    color: var(--ink-dim);
+  }
+  .ticker-track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 65s linear infinite;
+    padding-left: 100%;
+  }
+  .ticker-track span { margin-right: 48px; }
+  .ticker-track .alert { color: var(--danger); }
+  .ticker-track .ok { color: var(--accent); }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 32px; left: 0; right: 0;
+    background: rgba(10, 14, 13, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+    padding: 16px 6vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  nav .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  nav .logo::before {
+    content: "";
+    width: 14px; height: 14px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    display: inline-block;
+  }
+  nav ul {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  nav a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    padding: 170px 6vw 80px;
+    position: relative;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-tag .dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(212, 255, 58, 0); }
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(56px, 8.5vw, 132px);
+    line-height: 0.88;
+    letter-spacing: -0.04em;
+    font-variation-settings: "opsz" 144;
+    margin-bottom: 36px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .hero-sub {
+    font-size: 22px;
+    color: var(--ink-dim);
+    max-width: 560px;
+    line-height: 1.4;
+    margin-bottom: 48px;
+  }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 16px 28px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+    border: 1px solid;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--ink-dark);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+  .btn-primary:hover { background: transparent; color: var(--accent); }
+  .btn-ghost {
+    color: var(--ink);
+    border-color: var(--line);
+    background: transparent;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* HERO VISUAL */
+  .hero-visual {
+    position: relative;
+    aspect-ratio: 1/1;
+    max-width: 480px;
+    margin-left: auto;
+  }
+  .sentinel-emblem {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--line);
+    padding: 20px;
+  }
+  .emblem-inner {
+    width: 100%; height: 100%;
+    border: 1px dashed var(--line);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .emblem-core {
+    width: 55%;
+    height: 55%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
+    transform: rotate(45deg);
+    position: relative;
+    box-shadow: 0 0 80px rgba(212, 255, 58, 0.3);
+    animation: rotate 40s linear infinite;
+  }
+  .emblem-core::before,
+  .emblem-core::after {
+    content: "";
+    position: absolute;
+    background: var(--bg);
+  }
+  .emblem-core::before {
+    inset: 15%;
+    background: var(--bg);
+  }
+  .emblem-core::after {
+    inset: 30%;
+    background: var(--accent);
+  }
+  @keyframes rotate {
+    from { transform: rotate(45deg); }
+    to { transform: rotate(405deg); }
+  }
+  .emblem-ring {
+    position: absolute;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0.3;
+  }
+  .ring-1 { inset: 10%; animation: spin 20s linear infinite; }
+  .ring-2 { inset: 25%; border-style: dashed; animation: spin 15s linear infinite reverse; }
+  @keyframes spin {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+  }
+  .emblem-label {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .emblem-label.top { top: 8px; left: 50%; transform: translateX(-50%); }
+  .emblem-label.bot { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .emblem-label.lft { left: -4px; top: 50%; transform: rotate(-90deg) translateX(50%); transform-origin: left; }
+  .emblem-label.rgt { right: -4px; top: 50%; transform: rotate(90deg) translateX(-50%); transform-origin: right; }
+
+  /* SECTION HEADER */
+  .section-header {
+    padding: 120px 6vw 40px;
+    border-top: 1px solid var(--line);
+  }
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .section-tag::before { content: "[ "; color: var(--ink-faint); }
+  .section-tag::after { content: " ]"; color: var(--ink-faint); }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(36px, 5vw, 68px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 1000px;
+  }
+  .section-title em { font-style: italic; color: var(--ink-dim); font-weight: 400; }
+  .section-lead {
+    font-size: 20px;
+    color: var(--ink-dim);
+    max-width: 720px;
+    margin-top: 24px;
+    line-height: 1.5;
+  }
+
+  /* WHY IT MATTERS */
+  .why {
+    padding: 40px 6vw 120px;
+  }
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 40px;
+  }
+  .why-cell {
+    background: var(--bg);
+    padding: 44px 32px;
+    position: relative;
+  }
+  .why-stat {
+    font-family: 'Fraunces', serif;
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 0.9;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .why-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 16px;
+  }
+  .why-text {
+    font-size: 16px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .why-text strong { color: var(--ink); font-weight: 500; }
+
+  /* HOW WE SOLVE (light section — flip contrast) */
+  .solve {
+    background: var(--bg-light);
+    color: var(--ink-dark);
+    padding: 120px 6vw;
+    background-image:
+      linear-gradient(var(--grid-dark) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-dark) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .solve .section-tag { color: var(--ink-dark); }
+  .solve .section-tag::before,
+  .solve .section-tag::after { color: rgba(26, 31, 30, 0.4); }
+  .solve .section-title em { color: rgba(26, 31, 30, 0.5); }
+  .solve .section-lead { color: rgba(26, 31, 30, 0.7); }
+
+  .solve-main {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .solve-diagram {
+    border: 1px solid var(--line-dark);
+    padding: 40px;
+    background: rgba(255,255,255,0.5);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+  }
+  .solve-diagram .node {
+    padding: 12px 16px;
+    border: 1px solid var(--ink-dark);
+    background: var(--bg-light);
+    display: inline-block;
+    margin: 4px 0;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .solve-diagram .node.accent {
+    background: var(--ink-dark);
+    color: var(--accent);
+  }
+  .solve-diagram .arrow {
+    color: var(--ink-dark);
+    margin: 0 8px;
+    opacity: 0.6;
+  }
+  .solve-diagram .row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+  .solve-diagram .indent { padding-left: 32px; }
+
+  .solve-text h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 600;
+    font-style: italic;
+    margin-bottom: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .solve-text p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: rgba(26, 31, 30, 0.8);
+  }
+  .solve-text p strong { color: var(--ink-dark); }
+
+  /* WHO WE ARE */
+  .who {
+    padding: 120px 6vw;
+    border-top: 1px solid var(--line);
+  }
+  .who-statement {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    line-height: 1.2;
+    font-weight: 400;
+    max-width: 1100px;
+    margin: 40px 0 80px;
+    letter-spacing: -0.02em;
+  }
+  .who-statement em { color: var(--accent); font-style: italic; }
+  .who-statement .mark {
+    background: linear-gradient(180deg, transparent 55%, rgba(212, 255, 58, 0.2) 55%);
+    padding: 0 4px;
+  }
+
+  .founders {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .founder {
+    background: var(--bg);
+    padding: 32px 24px;
+  }
+  .founder-avatar {
+    width: 56px; height: 56px;
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+  }
+  .founder h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .founder .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .founder p {
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+
+  /* STEPS */
+  .steps {
+    padding: 120px 6vw;
+    border-top: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .steps-list {
+    margin-top: 60px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr 2fr;
+    gap: 40px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+    transition: background 0.3s;
+  }
+  .step:hover { background: rgba(212, 255, 58, 0.02); }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Fraunces', serif;
+    font-size: 48px;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .step-title .chip {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+  .step-desc {
+    font-size: 16px;
+    color: var(--ink-dim);
+    line-height: 1.65;
+  }
+  .step-desc strong { color: var(--ink); font-weight: 500; }
+
+  /* IMPACT */
+  .impact {
+    padding: 120px 6vw;
+    border-top: 1px solid var(--line);
+  }
+  .impact-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 60px;
+  }
+  .impact-card {
+    background: var(--bg);
+    padding: 32px 24px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .impact-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 32px;
+  }
+  .impact-icon {
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  .impact-card h5 {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .impact-card p {
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+
+  /* CTA */
+  .cta-block {
+    padding: 120px 6vw;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    background-image:
+      radial-gradient(circle at 50% 50%, rgba(212, 255, 58, 0.08) 0%, transparent 60%);
+  }
+  .cta-block h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(40px, 6vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta-block h2 em { color: var(--accent); font-style: italic; }
+  .cta-block p {
+    font-size: 20px;
+    color: var(--ink-dim);
+    max-width: 600px;
+    margin: 0 auto 40px;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 6vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  footer .logo-small { color: var(--accent); font-weight: 700; }
+
+  /* REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-visual { max-width: 340px; margin: 40px auto 0; }
+    .why-grid { grid-template-columns: 1fr; }
+    .solve-main { grid-template-columns: 1fr; gap: 40px; }
+    .founders { grid-template-columns: repeat(2, 1fr); }
+    .step { grid-template-columns: 60px 1fr; }
+    .step-desc { grid-column: 1 / -1; padding-left: 100px; }
+    .impact-grid { grid-template-columns: repeat(2, 1fr); }
+    nav ul { display: none; }
+  }
+  @media (max-width: 600px) {
+    .founders { grid-template-columns: 1fr; }
+    .impact-grid { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 1fr; gap: 16px; }
+    .step-desc { padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ok">◆ SENTINEL.CORE // STATUS: OPERATIONAL</span>
+    <span>· AUTONOMOUS RED AGENTS DEPLOYED ACROSS 142 CLIENT ENVIRONMENTS ·</span>
+    <span class="alert">▲ THREAT FEED: ELEVATED // AI-GENERATED PHISHING +340% YoY</span>
+    <span>· EU NIS2 COMPLIANCE SUPPORT: ACTIVE ·</span>
+    <span class="ok">◆ 2,847 VULNERABILITIES PATCHED THIS QUARTER</span>
+    <span>· SENTINEL BLUE NEUTRALISED 31 INTRUSION ATTEMPTS // LAST 24H ·</span>
+    <span class="alert">▲ OPEN-WEIGHT MODEL RELEASE DETECTED // ASSESSMENT IN PROGRESS</span>
+    <span>· EDUCATION PROGRAMME: 48 SCHOOLS ENROLLED ·</span>
+    <span class="ok">◆ DEFEND AT THE SPEED OF THE THREAT</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">SENTINEL</div>
+  <ul>
+    <li><a href="#why">Why</a></li>
+    <li><a href="#how">How</a></li>
+    <li><a href="#who">Who</a></li>
+    <li><a href="#steps">Solutions</a></li>
+    <li><a href="#impact">Impact</a></li>
+  </ul>
+  <a href="#contact" class="btn btn-ghost" style="padding:10px 18px; font-size:10px;">Request Briefing</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-tag"><span class="dot"></span>AUTONOMOUS AI DEFENSE // EST. 2026</div>
+    <h1>
+      Defend at<br>
+      the speed of<br>
+      <em>the threat.</em>
+    </h1>
+    <p class="hero-sub">
+      <strong>SENTINEL builds autonomous AI agents that probe, patch, and protect.</strong> We put frontier capability on the defender's side — for governments, enterprises, and the people they serve.
+    </p>
+    <div class="hero-cta">
+      <a href="#how" class="btn btn-primary">See How It Works →</a>
+      <a href="#steps" class="btn btn-ghost">Our Solutions</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="sentinel-emblem">
+      <div class="emblem-inner">
+        <div class="emblem-ring ring-1"></div>
+        <div class="emblem-ring ring-2"></div>
+        <div class="emblem-core"></div>
+      </div>
+      <span class="emblem-label top">// SENTINEL.CORE</span>
+      <span class="emblem-label bot">// v.01 // ACTIVE</span>
+      <span class="emblem-label lft">REDTEAM</span>
+      <span class="emblem-label rgt">DEFENSE</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<div class="section-header" id="why">
+  <div class="section-tag">01 // Why this matters</div>
+  <h2 class="section-title">The attackers already use AI. <em>The defenders don't.</em></h2>
+  <p class="section-lead">For the first time in the history of cybersecurity, the barrier to sophisticated attack has collapsed — while the cost of sophisticated defense has not. That gap is where societies are bleeding.</p>
+</div>
+
+<section class="why">
+  <div class="why-grid">
+    <div class="why-cell">
+      <div class="why-label">// Threat scale</div>
+      <div class="why-stat">4 min</div>
+      <p class="why-text">An AI-assisted operator can generate <strong>40 personalised spearphishing lures</strong> in under four minutes. Ransomware groups already run this workflow at industrial scale.</p>
+    </div>
+    <div class="why-cell">
+      <div class="why-label">// Defender gap</div>
+      <div class="why-stat">71%</div>
+      <p class="why-text">Of European hospitals, municipalities, and SMEs <strong>cannot afford enterprise-grade cybersecurity</strong> talent or tooling. They run legacy systems patched years late.</p>
+    </div>
+    <div class="why-cell">
+      <div class="why-label">// Pace of change</div>
+      <div class="why-stat">12–18</div>
+      <p class="why-text">Months between frontier capability and its <strong>open-weight equivalent</strong>. Today's defensive innovation is tomorrow's offensive tool. Innovation cannot be paused — it must be matched.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW WE SOLVE -->
+<div class="solve" id="how">
+  <div class="section-tag">02 // How Sentinel solves it</div>
+  <h2 class="section-title">Put the <em>good hackers</em> on autopilot.</h2>
+  <p class="section-lead">We train autonomous AI agents to do what human red-teamers do — continuously, at scale, and at a fraction of the cost. Every vulnerability they find is one an attacker doesn't.</p>
+
+  <div class="solve-main">
+    <div class="solve-diagram">
+      <div class="row"><span class="node">CLIENT INFRASTRUCTURE</span></div>
+      <div class="row indent"><span class="arrow">↓</span></div>
+      <div class="row indent"><span class="node accent">SENTINEL RED</span><span class="arrow">→</span><span style="color: var(--ink-dark); opacity:0.7;">finds it first</span></div>
+      <div class="row indent"><span class="arrow">↓</span></div>
+      <div class="row indent"><span class="node accent">SENTINEL BLUE</span><span class="arrow">→</span><span style="color: var(--ink-dark); opacity:0.7;">patches &amp; monitors</span></div>
+      <div class="row indent"><span class="arrow">↓</span></div>
+      <div class="row indent"><span class="node accent">SENTINEL ADVISE</span><span class="arrow">→</span><span style="color: var(--ink-dark); opacity:0.7;">policy &amp; compliance</span></div>
+      <div class="row indent"><span class="arrow">↓</span></div>
+      <div class="row"><span class="node">PROTECTED ORGANISATION</span></div>
+      <div style="margin-top:24px; padding-top:24px; border-top: 1px dashed var(--line-dark); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color: rgba(26,31,30,0.6);">// continuous loop · 24/7 operation</div>
+    </div>
+
+    <div class="solve-text">
+      <h3>One platform. Three agents. Continuous defense.</h3>
+      <p><strong>SENTINEL RED</strong> is our autonomous penetration-testing agent — a "good hacker" that probes your systems the way an attacker would, on a continuous loop rather than an annual audit.</p>
+      <p><strong>SENTINEL BLUE</strong> is the counter-agent: an AI defender that monitors traffic, detects anomalies, and neutralises intrusions in real time — including attacks from other AI agents.</p>
+      <p><strong>SENTINEL ADVISE</strong> translates what the agents learn into policy: NIS2 compliance reports, board briefings, staff training, and a chatbot for the non-technical people who keep your organisation running.</p>
+    </div>
+  </div>
+</div>
+
+<!-- WHO WE ARE -->
+<div class="section-header" id="who">
+  <div class="section-tag">03 // Who we are</div>
+  <h2 class="section-title">Founders who've <em>seen the asymmetry</em> up close.</h2>
+</div>
+
+<section class="who">
+  <p class="who-statement">
+    SENTINEL was founded in <em>Warsaw</em> in 2026 by a team from international relations, energy security, and cyber defense backgrounds. We started because we watched small hospitals, regional utilities, and public institutions — the backbone of European life — get <span class="mark">ransomed, phished, and silenced</span> by adversaries they had no realistic way of matching. We believe the same AI that armed the attackers can now arm everyone else.
+  </p>
+
+  <div class="founders">
+    <div class="founder">
+      <div class="founder-avatar">JK</div>
+      <h4>Jakub K.</h4>
+      <div class="role">Co-founder · Policy</div>
+      <p>Energy &amp; Central European security. Former GLOBSEC. Leads regulatory strategy and EU engagement.</p>
+    </div>
+    <div class="founder">
+      <div class="founder-avatar">—</div>
+      <h4>[Co-founder]</h4>
+      <div class="role">Co-founder · Engineering</div>
+      <p>AI systems and autonomous agents. Builds and trains the Sentinel Red and Blue agents.</p>
+    </div>
+    <div class="founder">
+      <div class="founder-avatar">—</div>
+      <h4>[Co-founder]</h4>
+      <div class="role">Co-founder · Security</div>
+      <p>Critical-infrastructure cyber defense. Former SOC. Leads the Blue team and client integration.</p>
+    </div>
+    <div class="founder">
+      <div class="founder-avatar">—</div>
+      <h4>[Co-founder]</h4>
+      <div class="role">Co-founder · Education</div>
+      <p>Digital literacy and public affairs. Leads schools, SMEs, and public-sector training programmes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<div class="section-header" id="steps" style="border-top: 1px solid var(--line);">
+  <div class="section-tag">04 // Concrete solutions</div>
+  <h2 class="section-title">Six steps. <em>One mission.</em></h2>
+  <p class="section-lead">We deliver across the three audiences that matter: private organisations, public institutions, and the citizens they serve.</p>
+</div>
+
+<section class="steps">
+  <div class="steps-list">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div>
+        <div class="step-title">Autonomous red-team agents<br><span class="chip">Private sector · Government</span></div>
+      </div>
+      <div class="step-desc">
+        <strong>AI "good hackers"</strong> that continuously probe client infrastructure for vulnerabilities, simulating attacker behaviour at machine speed. Replaces annual penetration tests with a 24/7 adversarial loop.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">02</div>
+      <div>
+        <div class="step-title">AI-powered defensive agents<br><span class="chip">Private sector · Government · Defense</span></div>
+      </div>
+      <div class="step-desc">
+        <strong>Counter-hacker AI</strong> that monitors networks, detects intrusion patterns, and responds in real time — including to AI-generated attacks that evade traditional signature-based tools.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">03</div>
+      <div>
+        <div class="step-title">Security policy &amp; compliance consulting<br><span class="chip">All clients</span></div>
+      </div>
+      <div class="step-desc">
+        Advisory services translating Sentinel's continuous findings into <strong>actionable security policy</strong>: NIS2 readiness, GDPR alignment, AI Act obligations, and board-level risk briefings.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">04</div>
+      <div>
+        <div class="step-title">Secure-by-default chatbot &amp; support<br><span class="chip">Private users · SMEs</span></div>
+      </div>
+      <div class="step-desc">
+        A <strong>plain-language AI assistant</strong> that helps individuals and small organisations understand what they're exposed to — and what to do about it. Enterprise-grade awareness for people who can't hire a CISO.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">05</div>
+      <div>
+        <div class="step-title">Education &amp; digital hygiene programme<br><span class="chip">Schools · Public sector</span></div>
+      </div>
+      <div class="step-desc">
+        Training modules for <strong>teenagers, teachers, and public-sector staff</strong> on how to spot AI-generated phishing, deepfakes, and manipulation. A generation that can defend itself is the cheapest defense there is.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">06</div>
+      <div>
+        <div class="step-title">Policy lobbying &amp; EU engagement<br><span class="chip">Institutions · Regulators</span></div>
+      </div>
+      <div class="step-desc">
+        We advocate for <strong>mandatory red-teaming thresholds, EU-level digital-hygiene curricula, and coordinated standards</strong> for AI cyber defense — so the rules catch up with the technology before the next crisis does.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<div class="section-header" id="impact">
+  <div class="section-tag">05 // Expected impacts</div>
+  <h2 class="section-title">What changes when <em>defenders get the same tools.</em></h2>
+</div>
+
+<section class="impact">
+  <div class="impact-grid">
+    <div class="impact-card">
+      <div class="impact-num">IMPACT.01</div>
+      <div class="impact-icon">↓</div>
+      <h5>Reduced attack surface</h5>
+      <p>Measurable reduction in successful breaches across client infrastructure. Vulnerabilities closed before attackers find them.</p>
+    </div>
+    <div class="impact-card">
+      <div class="impact-num">IMPACT.02</div>
+      <div class="impact-icon">⇌</div>
+      <h5>Democratised security</h5>
+      <p>Enterprise-grade defense for hospitals, municipalities, and SMEs that currently can't afford it — closing the defender gap.</p>
+    </div>
+    <div class="impact-card">
+      <div class="impact-num">IMPACT.03</div>
+      <div class="impact-icon">✦</div>
+      <h5>A resilient generation</h5>
+      <p>Teenagers, teachers, and citizens equipped to recognise AI-era manipulation — phishing, deepfakes, social engineering.</p>
+    </div>
+    <div class="impact-card">
+      <div class="impact-num">IMPACT.04</div>
+      <div class="impact-icon">◎</div>
+      <h5>European sovereign capacity</h5>
+      <p>A European defensive-AI provider reduces dependence on US security vendors and keeps critical data under EU jurisdiction.</p>
+    </div>
+    <div class="impact-card">
+      <div class="impact-num">IMPACT.05</div>
+      <div class="impact-icon">§</div>
+      <h5>Smarter regulation</h5>
+      <p>Standards for AI red-teaming, digital-hygiene education, and coordinated response — shaped by practitioners, not just policymakers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-block" id="contact">
+  <h2>The threat doesn't wait.<br><em>Neither should you.</em></h2>
+  <p>Request a confidential briefing for your organisation, institution, or ministry. We'll show you where you're exposed — and what we can do about it.</p>
+  <div class="cta-buttons">
+    <a href="mailto:contact@sentinel.eu" class="btn btn-primary">Request a Briefing →</a>
+    <a href="#" class="btn btn-ghost">Download the Whitepaper</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo-small">◆ SENTINEL</div>
+  <div>WARSAW · EST. 2026</div>
+  <div>PRIVACY · TERMS · CONTACT</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.why-cell, .founder, .step, .impact-card, .section-title').forEach(el => {
+    el.classList.add('reveal');
+    obs.observe(el);
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (href.length > 1) {
+        const el = document.querySelector(href);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
